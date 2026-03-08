@@ -1,0 +1,6 @@
+{
+    "shell_cmd": "cmd /c \"echo @echo off > \"%temp%\\run_ящер3.bat\" && echo ящер3 \"$file_name\" >> \"%temp%\\run_ящер3.bat\" && echo pause >> \"%temp%\\run_ящер3.bat\" && start \"Ящер3\" /wait \"%temp%\\run_ящер3.bat\" && del \"%temp%\\run_ящер3.bat\"\"",
+    "working_dir": "$file_path",
+    "selector": "source.русь",
+    "encoding": "utf-8"
+}

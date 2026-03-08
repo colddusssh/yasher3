@@ -3,7 +3,7 @@ chcp 65001 >nul
 setlocal enabledelayedexpansion
 
 echo ========================================
-echo   Установщик ящер3
+echo    Установщик ящер3
 echo ========================================
 echo.
 

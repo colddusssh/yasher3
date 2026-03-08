@@ -1,0 +1,266 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-import sys
+
+import subprocess
+import code
+from tokenize import generate_tokens, NAME, NEWLINE, INDENT, DEDENT
+from io import StringIO
+
+words = {
+    # Ключевые слова
+    "коли": "if",
+    "отнюдь": "else",
+    "отнюдь_если": "elif",
+    "покуда": "while",
+    "для": "for",
+    "воздать": "return",
+    "династия": "class",
+    "попытаться": "try",
+    "поймать": "except",
+    "поднять": "raise",
+    "с_чем": "with",
+    "внедрить": "import",
+    "из": "from",
+    "как": "as",
+    "не": "not",
+    "и": "and",
+    "или": "or",
+    "в": "in",
+    "есть": "is",
+    "ламбда": "lambda",
+    "уступить": "yield",
+    "глобал": "global",
+    "нелокальный": "nonlocal",
+    "утверждать": "assert",
+    "перерыв": "break",
+    "продолжить": "continue",
+    "проход": "pass",
+    "удалить": "del",
+    "переключатель": "match",
+    "путь": "case",
+    "базированно": "_",
+    "правда": "True",
+    "кривда": "False",
+    "никто": "None",
+    "ничто": "None",
+
+    # Встроенные функции
+    "молвить": "print",
+    "внемлить": "input",
+    "длина": "len",
+    "диапазон": "range",
+    "тип": "type",
+    "строка": "str",
+    "целина": "int",
+    "дробь": "float",
+    "комплекс": "complex",
+    "список": "list",
+    "кортеж": "tuple",
+    "словарь": "dict",
+    "множество": "set",
+    "замороженное_множество": "frozenset",
+    "булево": "bool",
+    "байты": "bytes",
+    "байтовый_массив": "bytearray",
+    "открыть": "open",
+    "прочитать": "read",
+    "писать": "write",
+    "закрыть": "close",
+    "мощь": "pow",
+    "помощь": "help",
+    "выйти": "exit()",
+    "перечисление": "enumerate",
+    "сцепление": "zip",
+    "отобразить": "map",
+    "отфильтровать": "filter",
+    "сортированный": "sorted",
+    "обратный": "reversed",
+    "минимум": "min",
+    "максимум": "max",
+    "сумма": "sum",
+    "абсолют": "abs",
+    "округлить": "round",
+    "является_экземпляром": "isinstance",
+    "является_подклассом": "issubclass",
+    "имеет_атрибут": "hasattr",
+    "получить_атрибут": "getattr",
+    "установить_атрибут": "setattr",
+    "удалить_атрибут": "delattr",
+    "все": "all",
+    "любой": "any",
+    "двоичный": "bin",
+    "шестнадцатеричный": "hex",
+    "восьмеричный": "oct",
+    "символ": "chr",
+    "код": "ord",
+    "идентификатор": "id",
+    "хэш": "hash",
+    "вызвать": "callable",
+    "итератор": "iter",
+    "следующий": "next",
+    "объект": "object",
+    "свойство": "property",
+    "статический_метод": "staticmethod",
+    "метод_класса": "classmethod",
+    "супер": "super",
+    "глобальные": "globals",
+    "локальные": "locals",
+    "переменные": "vars",
+    "директория": "dir",
+    "формат": "format",
+    "представление": "repr",
+    "срез": "slice",
+    "компилировать": "compile",
+    "выполнить": "exec",
+    "оценить": "eval",
+
+    # Часто используемые модули (имена для импорта)
+    "Русь": "sys",
+    "времечко": "time",
+    "случайно": "random",
+    "математика": "math",
+    "регулярка": "re",
+    "ос": "os",
+    "json": "json",
+    "пикль": "pickle",
+    "датавремя": "datetime",
+    "коллекции": "collections",
+    "итератул": "itertools",
+
+    # Исключения
+    "беда": "Exception",
+    "ошибка_значения": "ValueError",
+    "ошибка_типа": "TypeError",
+    "ошибка_индекса": "IndexError",
+    "ошибка_ключа": "KeyError",
+    "ошибка_имени": "NameError",
+    "ошибка_атрибута": "AttributeError",
+    "ошибка_импорта": "ImportError",
+    "ошибка_останова": "StopIteration",
+
+    # ООП
+    "сам": "self",
+    "инициализация": "__init__",
+    "строка_документации": "__doc__",
+    "местный": "self",
+    "родитель": "super",
+
+    # Операторы и методы коллекций
+    "оператор": "operator",
+    "двинуть": "move",
+    "двойня": "tuple",
+    "старший": "[0]",
+    "младший": "[1]",
+    "приклеить": "append",       # для списка
+    "растянуть": "extend",
+    "вставить": "insert",
+    "убрать": "pop",
+    "очистить": "clear",
+    "счёт": "count",
+    "индекс": "index",
+    "скопировать": "copy",
+    "обновить": "update",        # для словаря
+    "ключи": "keys",
+    "значения": "values",
+    "предметы": "items",
+    "получить": "get",
+
+    # Структуры данных из коллекций
+    "очередь": "deque",
+    "счетчик": "Counter",
+    "упорядоченный_словарь": "OrderedDict",
+    "цепочка": "chain",
+
+    # Файловые методы
+    "прочитать_строку": "readline",
+    "прочитать_строки": "readlines",
+    "записать_строки": "writelines",
+    "искать": "seek",
+    "рассказать": "tell",
+
+    # Прочее
+    "казнь": "del",
+    "туда_не_знаю_куда": "None",
+    "новь": "None",
+    "в_строченьку": "str",
+}
+
+def translate_code(source, word_map):
+    tokens = list(generate_tokens(StringIO(source).readline))
+    result = []
+    prev_end_col = 0
+    prev_line = 1
+
+    for toknum, tokval, start, end, line in tokens:
+        line_num, col = start
+
+        if line_num > prev_line:
+            result.append("\n")
+            if col > 0:
+                result.append(" " * col)
+        else:
+            spaces = col - prev_end_col
+            if spaces > 0:
+                result.append(" " * spaces)
+
+        if toknum == NAME and tokval in word_map:
+            token_str = word_map[tokval]
+        else:
+            token_str = tokval
+
+        result.append(token_str)
+
+        prev_end_col = end[1]
+        prev_line = end[0]
+
+    return "".join(result)
+
+class SlavicInteractiveConsole(code.InteractiveConsole):
+    def __init__(self, word_map, locals=None):
+        super().__init__(locals)
+        self.word_map = word_map
+
+    def runsource(self, source, filename="<input>", symbol="single"):
+        try:
+            translated = translate_code(source, self.word_map)
+        except Exception as e:
+            self.write(f"Ошибка перевода: {e}\n")
+            return False
+        return super().runsource(translated, filename, symbol)
+
+def run_interactive():
+    print("Славянский языкъ программирования ящер3 ('выйти' для выхода)")
+    sys.ps1 = ">>> "
+    sys.ps2 = "...    "
+    console = SlavicInteractiveConsole(words)
+    console.interact(banner="", exitmsg="До свидания!")
+
+def main():
+    args = sys.argv[1:]
+    if not args:
+        run_interactive()
+        return
+
+    filepath = args[0]
+    try:
+        with open(filepath, "r", encoding="utf-8") as f:
+            source = f.read()
+
+    except FileNotFoundError:
+        print(f"Файл {filepath} не найден")
+        sys.exit(1)
+
+    translated = translate_code(source, words)
+
+    out_path = f".out_{filepath}.py"
+    with open(out_path, "w", encoding="utf-8") as f:
+        f.write(translated)
+
+    try:
+        subprocess.run(["python3", out_path], check=True)
+    except subprocess.CalledProcessError as e:
+        print(f"Ошибка выполнения: {e}")
+        sys.exit(1)
+
+if __name__ == "__main__":
+    main()

@@ -41,8 +41,6 @@
 
 ### Другие ОС (Linux / macOS)
 
-Пока автоматического установщика нет, но вы можете скачать исполняемый файл напрямую:
-
 ```bash
 curl -L -o ящер3 https://github.com/colddusssh/yasher3/raw/refs/heads/main/bin/ящер3
 chmod +x ящер3

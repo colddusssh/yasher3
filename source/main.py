@@ -33,6 +33,7 @@ words = {
     "нелокальный": "nonlocal",
     "утверждать": "assert",
     "перерыв": "break",
+    "бить_ящеров": "break",
     "продолжить": "continue",
     "проход": "pass",
     "удалить": "del",
@@ -118,6 +119,7 @@ words = {
     "Русь": "sys",
     "времечко": "time",
     "случайно": "random",
+    "случайная_целина": "randint",
     "математика": "math",
     "регулярка": "re",
     "ос": "os",
@@ -180,9 +182,14 @@ words = {
 
     # Прочее
     "казнь": "del",
+    "обряд": "def",
     "туда_не_знаю_куда": "None",
     "новь": "None",
     "в_строченьку": "str",
+    "царь_батюшка_главный": "'__main__'",
+    "__имя__": "__name__",
+    "пока": "while"
+
 }
 
 def translate_code(source, word_map):
@@ -257,7 +264,7 @@ def main():
         f.write(translated)
 
     try:
-        subprocess.run(["python", out_path], check=True)
+        subprocess.run(["python3", out_path], check=True)
     except subprocess.CalledProcessError as e:
         print(f"Ошибка выполнения: {e}")
         sys.exit(1)
